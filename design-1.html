@@ -194,8 +194,8 @@ section{scroll-margin-top:var(--nav-h)}
   letter-spacing:.16em;text-transform:uppercase;color:var(--red);border-bottom:2px solid var(--red);padding-bottom:6px;transition:.25s}
 .link-red:hover{gap:15px}
 .carousel{margin-top:clamp(38px,4.4vw,56px);position:relative}
-.viewport{overflow:hidden;border-radius:6px}
-.track{display:flex;transition:transform .6s cubic-bezier(.3,.8,.25,1)}
+.viewport{overflow:hidden;border-radius:6px;transition:height .5s cubic-bezier(.3,.8,.25,1)}
+.track{display:flex;align-items:flex-start;transition:transform .6s cubic-bezier(.3,.8,.25,1)}
 .slide{flex:0 0 100%;min-width:0}
 .slide-in{display:grid;grid-template-columns:.82fr 1.18fr;background:var(--navy);color:#fff;min-height:520px}
 .shot{position:relative;background:var(--navy-2);overflow:hidden}
@@ -212,17 +212,20 @@ section{scroll-margin-top:var(--nav-h)}
 .rev-role{font-size:.6rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--red)}
 .rev-date{font-size:.82rem;color:rgba(255,255,255,.66)}
 .stars{color:var(--gold);letter-spacing:.16em;font-size:1.02rem;margin:14px 0 20px}
-.rev-body{color:var(--on-dark);max-height:14.5em;overflow:auto;padding-right:14px;font-size:.98rem}
+.rev-body{color:var(--on-dark);padding-right:14px;font-size:.98rem}
 .rev-body p:last-child{margin-bottom:0}
-.rev-body::-webkit-scrollbar{width:3px}
-.rev-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.22)}
+.rev-body.clamp{max-height:9.5em;overflow:hidden;position:relative}
+.rev-body.clamp::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2.6em;background:linear-gradient(rgba(26,42,57,0),var(--navy))}
+.rev-more{margin-top:16px;background:none;border:0;padding:0;cursor:pointer;font-family:inherit;font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--red);border-bottom:1px solid currentColor;line-height:1.4;transition:opacity .2s}
+.rev-more:hover{opacity:.7}
+.rev-more[hidden]{display:none}
 .pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:26px;padding-top:24px;border-top:1px solid rgba(255,255,255,.14)}
 .pill{font-size:.68rem;font-weight:600;letter-spacing:.06em;color:rgba(255,255,255,.72);
   border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:6px 12px;white-space:nowrap}
 .pill b{color:var(--gold);font-weight:700}
 .car-ctrl{display:flex;align-items:center;gap:14px;margin-top:26px}
 .arrow{width:48px;height:48px;border-radius:3px;border:1px solid var(--line);background:#fff;cursor:pointer;
-  display:grid;place-items:center;transition:.25s;color:var(--navy)}
+  display:grid;place-items:center;transition:.25s;color:var(--navy);flex:0 0 auto}
 .arrow svg{width:16px;height:16px}
 .arrow:hover{background:var(--red);border-color:var(--red);color:#fff}
 .dots{display:flex;gap:8px;margin-left:6px}
@@ -511,7 +514,8 @@ track.innerHTML=REVIEWS.map(r=>{
         <span class="rev-date">${r.date}</span>
       </div>
       <div class="stars" aria-label="5 out of 5">★★★★★</div>
-      <div class="rev-body">${r.text.map(p=>`<p>${p}</p>`).join('')}</div>
+      <div class="rev-body clamp">${r.text.map(p=>`<p>${p}</p>`).join('')}</div>
+      <button class="rev-more" type="button" hidden>Read more</button>
       <div class="pills">${CRITERIA.map(c=>`<span class="pill">${c} <b>5.0</b></span>`).join('')}</div>
     </div></div></article>`;
 }).join('');
@@ -531,6 +535,7 @@ function go(n){
   [...dots.children].forEach((d,k)=>d.classList.toggle('is-on',k===i));
   slides.forEach((s,k)=>s.setAttribute('aria-hidden',k!==i));
   document.getElementById('cur').textContent=String(i+1).padStart(2,'0');
+  setH();
 }
 function stop(){clearInterval(timer);timer=null;}
 document.getElementById('next').addEventListener('click',()=>{go(i+1);stop();});
@@ -548,7 +553,32 @@ car.addEventListener('touchend',e=>{
   if(Math.abs(dx)>48){go(dx<0?i+1:i-1);stop();}
   x0=null;
 },{passive:true});
+const viewport=track.parentElement;
+function setH(){viewport.style.height=slides[i].offsetHeight+'px';}
+function syncClamp(){
+  track.querySelectorAll('.rev-body').forEach(body=>{
+    if(body.dataset.expanded==='1')return;
+    body.classList.add('clamp');
+    const btn=body.nextElementSibling;
+    if(body.scrollHeight-1>body.clientHeight){btn.hidden=false;btn.textContent='Read more';}
+    else{body.classList.remove('clamp');btn.hidden=true;}
+  });
+}
+track.querySelectorAll('.rev-more').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const body=btn.previousElementSibling;
+    const expanded=!body.classList.toggle('clamp');
+    body.dataset.expanded=expanded?'1':'';
+    btn.textContent=expanded?'Read less':'Read more';
+    setH();
+  });
+});
+function refresh(){syncClamp();setH();}
+syncClamp();
 go(0);
+window.addEventListener('load',refresh);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(refresh);
+let carRz;window.addEventListener('resize',()=>{clearTimeout(carRz);carRz=setTimeout(refresh,150);});
 if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
   timer=setInterval(()=>go(i+1),9000);
   car.addEventListener('mouseenter',()=>{if(timer){clearInterval(timer);timer='p';}});

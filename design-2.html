@@ -203,8 +203,8 @@ section{scroll-margin-top:var(--nav-h)}
 /* ---------- testimonials ---------- */
 .reviews-top{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:clamp(34px,4vw,50px)}
 .carousel{position:relative;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
-.viewport{overflow:hidden}
-.track{display:flex;transition:transform .62s cubic-bezier(.3,.8,.25,1)}
+.viewport{overflow:hidden;transition:height .5s cubic-bezier(.3,.8,.25,1)}
+.track{display:flex;align-items:flex-start;transition:transform .62s cubic-bezier(.3,.8,.25,1)}
 .slide{flex:0 0 100%;min-width:0;padding:clamp(28px,4vw,52px) 0}
 .slide-grid{display:grid;grid-template-columns:.86fr 1.14fr;gap:clamp(26px,4vw,56px);align-items:start}
 .shot{background:var(--mist);position:relative;aspect-ratio:4/4.4;overflow:hidden}
@@ -221,10 +221,13 @@ section{scroll-margin-top:var(--nav-h)}
 .rev-role{font-size:.64rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--brass)}
 .rev-date{font-size:.82rem;color:var(--muted)}
 .stars{color:var(--star);letter-spacing:.16em;font-size:1rem;margin:12px 0 20px}
-.rev-body{color:var(--muted);max-height:15.5em;overflow:auto;padding-right:12px;font-size:.98rem}
+.rev-body{color:var(--muted);padding-right:12px;font-size:.98rem}
 .rev-body p:last-child{margin-bottom:0}
-.rev-body::-webkit-scrollbar{width:3px}
-.rev-body::-webkit-scrollbar-thumb{background:var(--rule)}
+.rev-body.clamp{max-height:9.5em;overflow:hidden;position:relative}
+.rev-body.clamp::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2.6em;background:linear-gradient(rgba(255,255,255,0),#fff)}
+.rev-more{margin-top:16px;background:none;border:0;padding:0;cursor:pointer;font-family:inherit;font-size:.72rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--brass);border-bottom:1px solid currentColor;line-height:1.4;transition:opacity .2s}
+.rev-more:hover{opacity:.7}
+.rev-more[hidden]{display:none}
 .criteria{margin-top:26px;padding-top:22px;border-top:1px solid var(--rule);
   display:grid;grid-template-columns:repeat(2,1fr);gap:6px 26px}
 .criteria div{display:flex;justify-content:space-between;gap:12px;font-size:.78rem;color:var(--muted);
@@ -233,7 +236,7 @@ section{scroll-margin-top:var(--nav-h)}
 .car-ctrl{display:flex;align-items:center;gap:16px;padding:20px 0;border-top:1px solid var(--rule)}
 .arrow{
   width:46px;height:46px;border-radius:50%;border:1px solid var(--rule);background:none;cursor:pointer;
-  display:grid;place-items:center;transition:.25s;
+  display:grid;place-items:center;transition:.25s;flex:0 0 auto;
 }
 .arrow svg{width:16px;height:16px}
 .arrow:hover:not(:disabled){background:var(--ink);color:#fff;border-color:var(--ink)}
@@ -549,7 +552,8 @@ track.innerHTML = REVIEWS.map(r=>{
         <span class="rev-date">${r.date}</span>
       </div>
       <div class="stars" aria-label="5 out of 5">★★★★★</div>
-      <div class="rev-body">${r.text.map(p=>`<p>${p}</p>`).join('')}</div>
+      <div class="rev-body clamp">${r.text.map(p=>`<p>${p}</p>`).join('')}</div>
+      <button class="rev-more" type="button" hidden>Read more</button>
       <div class="criteria">${CRITERIA.map(c=>`<div><span>${c}</span><s>★★★★★</s></div>`).join('')}</div>
     </div></div></article>`;
 }).join('');
@@ -571,6 +575,7 @@ function go(n){
   [...dots.children].forEach((d,k)=>d.classList.toggle('is-on',k===i));
   slides.forEach((s,k)=>s.setAttribute('aria-hidden',k!==i));
   document.getElementById('cur').textContent=String(i+1).padStart(2,'0');
+  setH();
 }
 function stop(){clearInterval(timer);timer=null;}
 document.getElementById('next').addEventListener('click',()=>{go(i+1);stop();});
@@ -588,7 +593,32 @@ car.addEventListener('touchend',e=>{
   if(Math.abs(dx)>48){go(dx<0?i+1:i-1);stop();}
   x0=null;
 },{passive:true});
+const viewport=track.parentElement;
+function setH(){viewport.style.height=slides[i].offsetHeight+'px';}
+function syncClamp(){
+  track.querySelectorAll('.rev-body').forEach(body=>{
+    if(body.dataset.expanded==='1')return;
+    body.classList.add('clamp');
+    const btn=body.nextElementSibling;
+    if(body.scrollHeight-1>body.clientHeight){btn.hidden=false;btn.textContent='Read more';}
+    else{body.classList.remove('clamp');btn.hidden=true;}
+  });
+}
+track.querySelectorAll('.rev-more').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const body=btn.previousElementSibling;
+    const expanded=!body.classList.toggle('clamp');
+    body.dataset.expanded=expanded?'1':'';
+    btn.textContent=expanded?'Read less':'Read more';
+    setH();
+  });
+});
+function refresh(){syncClamp();setH();}
+syncClamp();
 go(0);
+window.addEventListener('load',refresh);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(refresh);
+let carRz;window.addEventListener('resize',()=>{clearTimeout(carRz);carRz=setTimeout(refresh,150);});
 if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
   timer=setInterval(()=>go(i+1),9000);
   car.addEventListener('mouseenter',()=>{if(timer){clearInterval(timer);timer='p';}});
