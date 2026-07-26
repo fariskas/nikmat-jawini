@@ -129,7 +129,7 @@ h1 .red{color:var(--red)}
 .btn-line:hover{background:#fff;color:var(--navy);border-color:#fff}
 .hero-figure{position:relative;z-index:2;margin:clamp(8px,1.6vw,20px) auto 0;width:min(392px,76vw)}
 .hero-figure img{width:100%;filter:drop-shadow(0 30px 60px rgba(0,0,0,.4))}
-.hero-figure::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:32%;
+.hero-figure::after{content:"";position:absolute;left:50%;right:auto;width:100vw;transform:translateX(-50%);bottom:-1px;height:32%;
   background:linear-gradient(180deg,rgba(26,42,57,0),var(--navy))}
 .hero-strip{position:relative;z-index:3;border-top:1px solid rgba(255,255,255,.13);background:var(--deep)}
 .hero-strip .wrap{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
@@ -181,7 +181,7 @@ section{scroll-margin-top:var(--nav-h)}
 .marquee::before{left:0;background:linear-gradient(90deg,var(--deep),rgba(18,29,39,0))}
 .marquee::after{right:0;background:linear-gradient(270deg,var(--deep),rgba(18,29,39,0))}
 .marquee-track{display:flex;width:max-content;animation:slide 44s linear infinite;will-change:transform}
-.marquee:hover .marquee-track{animation-play-state:paused}
+@media (hover:hover) and (pointer:fine){.marquee:hover .marquee-track{animation-play-state:paused}}
 @keyframes slide{from{transform:translate3d(0,0,0)}to{transform:translate3d(calc(-1 * var(--shift,50%)),0,0)}}
 .award{flex:0 0 auto;height:clamp(290px,35vw,450px);margin-right:clamp(14px,2vw,26px);border-radius:5px;overflow:hidden;
   box-shadow:0 22px 44px -22px rgba(0,0,0,.85);transition:transform .35s}
