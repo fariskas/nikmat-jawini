@@ -48,6 +48,17 @@ const REVIEWS = [
     ],
   },
   {
+    name: "Rajan Giin Jyh",
+    role: "Buyer",
+    date: "07 June 2025",
+    initials: "RG",
+    photo: "assets/customers/rajan.jpg",
+    text: [
+      "News headline — 10 stars rating!! His knowledge, his transparency, and he responds fast as thunder. I had an amazing journey from the viewing request all the way to handover. Nikmat is always ahead of every detail, and that is what made engaging him so satisfying.",
+      "He shares all the useful information openly over social media, which helped me get up to speed with everything I needed as a kick start. People these days say don't trust what you see on social media — so I decided to meet Nikmat in person, and what he shares online is exactly what you get in the live meeting. Trustworthy, superb agent — 10 stars.",
+    ],
+  },
+  {
     name: "Bella Ariffin",
     role: "Buyer",
     date: "03 March 2025",
@@ -116,57 +127,140 @@ track.innerHTML = REVIEWS.map((r) => {
     </div></div></article>`;
 }).join("");
 
-const slides = [...track.children],
-  dots = document.getElementById("dots");
-let i = 0,
-  timer = null;
-document.getElementById("tot").textContent = String(
-  slides.length,
-).padStart(2, "0");
+const slides = [...track.children];
+const dots = document.getElementById("dots");
+const N = slides.length;
+const viewport = track.parentElement;
+const car = document.getElementById("carousel");
+const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let pos = 1,
+  real = 0,
+  timer = null,
+  loopT = null,
+  xslides = slides;
+document.getElementById("tot").textContent = String(N).padStart(2, "0");
+
+// dots
 slides.forEach((_, n) => {
   const b = document.createElement("button");
   b.className = "dot";
   b.setAttribute("role", "tab");
   b.setAttribute("aria-label", "Review " + (n + 1));
   b.addEventListener("click", () => {
-    go(n);
+    goTo(n);
     stop();
   });
   dots.appendChild(b);
 });
-function go(n) {
-  i = (n + slides.length) % slides.length;
-  track.style.transform = `translate3d(${-i * 100}%,0,0)`;
-  [...dots.children].forEach((d, k) =>
-    d.classList.toggle("is-on", k === i),
-  );
-  slides.forEach((s, k) => s.setAttribute("aria-hidden", k !== i));
-  document.getElementById("cur").textContent = String(i + 1).padStart(
-    2,
-    "0",
-  );
+
+// clamp + read-more (real slides only; clones inherit the state)
+function syncClamp() {
+  slides.forEach((slide) => {
+    const body = slide.querySelector(".rev-body");
+    if (!body || body.dataset.expanded === "1") return;
+    body.classList.add("clamp");
+    const btn = body.nextElementSibling;
+    if (body.scrollHeight - 1 > body.clientHeight) {
+      btn.hidden = false;
+      btn.textContent = "Read more";
+    } else {
+      body.classList.remove("clamp");
+      btn.hidden = true;
+    }
+  });
+}
+slides.forEach((slide) => {
+  const btn = slide.querySelector(".rev-more");
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    const body = btn.previousElementSibling;
+    const expanded = !body.classList.toggle("clamp");
+    body.dataset.expanded = expanded ? "1" : "";
+    btn.textContent = expanded ? "Read less" : "Read more";
+    setH();
+  });
+});
+syncClamp();
+
+// clones for seamless infinite loop: [ lastClone, s0..sN-1, firstClone ]
+const firstClone = slides[0].cloneNode(true);
+const lastClone = slides[N - 1].cloneNode(true);
+[firstClone, lastClone].forEach((c) => c.setAttribute("aria-hidden", "true"));
+track.insertBefore(lastClone, slides[0]);
+track.appendChild(firstClone);
+xslides = [...track.children]; // real slide k is at index k+1
+
+function place(animate) {
+  if (!animate) track.style.transition = "none";
+  track.style.transform = `translate3d(${-pos * 100}%,0,0)`;
+  if (!animate) {
+    void track.offsetWidth; // reflow so the snap is not animated
+    track.style.transition = "";
+  }
+}
+function updateUI() {
+  [...dots.children].forEach((d, k) => d.classList.toggle("is-on", k === real));
+  slides.forEach((s, k) => s.setAttribute("aria-hidden", k !== real));
+  document.getElementById("cur").textContent = String(real + 1).padStart(2, "0");
+}
+function setH() {
+  viewport.style.height = xslides[pos].offsetHeight + "px";
+}
+function normalize() {
+  if (pos === 0) {
+    pos = N;
+    place(false);
+    setH();
+  } else if (pos === N + 1) {
+    pos = 1;
+    place(false);
+    setH();
+  }
+}
+function go(dir) {
+  if (pos === 0 || pos === N + 1) normalize(); // resolve a pending loop first
+  pos += dir;
+  real = (real + dir + N) % N;
+  updateUI();
+  place(true);
+  setH();
+  if (reduce) normalize();
+  else if (pos === 0 || pos === N + 1) {
+    clearTimeout(loopT); // backup in case transitionend doesn't fire
+    loopT = setTimeout(normalize, 700);
+  }
+}
+function goTo(k) {
+  if (pos === 0 || pos === N + 1) normalize();
+  real = k;
+  pos = k + 1;
+  updateUI();
+  place(true);
   setH();
 }
 function stop() {
   clearInterval(timer);
   timer = null;
 }
+track.addEventListener("transitionend", (e) => {
+  if (e.target !== track || e.propertyName !== "transform") return;
+  normalize();
+});
 document.getElementById("next").addEventListener("click", () => {
-  go(i + 1);
+  go(1);
   stop();
 });
 document.getElementById("prev").addEventListener("click", () => {
-  go(i - 1);
+  go(-1);
   stop();
 });
-const car = document.getElementById("carousel");
 car.addEventListener("keydown", (e) => {
   if (e.key === "ArrowRight") {
-    go(i + 1);
+    go(1);
     stop();
   }
   if (e.key === "ArrowLeft") {
-    go(i - 1);
+    go(-1);
     stop();
   }
 });
@@ -184,56 +278,29 @@ car.addEventListener(
     if (x0 === null) return;
     const dx = e.changedTouches[0].clientX - x0;
     if (Math.abs(dx) > 48) {
-      go(dx < 0 ? i + 1 : i - 1);
+      go(dx < 0 ? 1 : -1);
       stop();
     }
     x0 = null;
   },
   { passive: true },
 );
-const viewport = track.parentElement;
-function setH() {
-  viewport.style.height = slides[i].offsetHeight + "px";
-}
-function syncClamp() {
-  track.querySelectorAll(".rev-body").forEach((body) => {
-    if (body.dataset.expanded === "1") return;
-    body.classList.add("clamp");
-    const btn = body.nextElementSibling;
-    if (body.scrollHeight - 1 > body.clientHeight) {
-      btn.hidden = false;
-      btn.textContent = "Read more";
-    } else {
-      body.classList.remove("clamp");
-      btn.hidden = true;
-    }
-  });
-}
-track.querySelectorAll(".rev-more").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const body = btn.previousElementSibling;
-    const expanded = !body.classList.toggle("clamp");
-    body.dataset.expanded = expanded ? "1" : "";
-    btn.textContent = expanded ? "Read less" : "Read more";
-    setH();
-  });
-});
 function refresh() {
   syncClamp();
   setH();
 }
-syncClamp();
-go(0);
+place(false);
+updateUI();
+setH();
 window.addEventListener("load", refresh);
-if (document.fonts && document.fonts.ready)
-  document.fonts.ready.then(refresh);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(refresh);
 let carRz;
 window.addEventListener("resize", () => {
   clearTimeout(carRz);
   carRz = setTimeout(refresh, 150);
 });
-if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-  timer = setInterval(() => go(i + 1), 9000);
+if (!reduce) {
+  timer = setInterval(() => go(1), 9000);
   car.addEventListener("mouseenter", () => {
     if (timer) {
       clearInterval(timer);
@@ -241,7 +308,7 @@ if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     }
   });
   car.addEventListener("mouseleave", () => {
-    if (timer === "p") timer = setInterval(() => go(i + 1), 9000);
+    if (timer === "p") timer = setInterval(() => go(1), 9000);
   });
 }
 
@@ -311,7 +378,7 @@ function sizeMarquee() {
     t.style.width = w * 2 + "px";
     t.style.setProperty("--shift", w + "px");
     t.style.animationDuration =
-      (w / (window.innerWidth >= 900 ? 80 : 62)).toFixed(2) + "s"; // ~80px/sec desktop, 62 mobile
+      (w / (window.innerWidth >= 900 ? 115 : 62)).toFixed(2) + "s"; // ~115px/sec desktop, 62 mobile
   });
 }
 sizeMarquee();
