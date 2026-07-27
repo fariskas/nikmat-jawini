@@ -95,6 +95,18 @@ const REVIEWS = [
       "The trust we placed in him was fully justified, and he delivered above and beyond our expectations. We will definitely reach out to him again for any future property matters. Thank you so much, Nikmat!",
     ],
   },
+  {
+    name: "Ismail",
+    role: "Buyer",
+    date: "26 September 2025",
+    initials: "IS",
+    photo: "assets/customers/ismail.jpg",
+    text: [
+      "Nikmat helped us with the sale of our first home, then followed up by helping us secure our forever home. He had already understood our requirements and advised us on the units that best matched our criteria. He was very patient with us — we viewed more than 20 units before landing on the one we all agreed on.",
+      "Then came another obstacle: buying the house at a valuation we could gain an advantage from. With Nikmat's advice, everything fell nicely into place. Thanks to the calculations he made, we were happy to purchase our forever home with extra cash in hand — and even projected to finish paying off the house before either of us retires.",
+      "He communicated clearly at every step and was empathetic throughout, always trying to put himself in our situation. He is very knowledgeable and backs every statement with statistics, and he is honest if the option we are leaning towards is not the best one — he will do his best to find a better alternative. You can be certain you have approached the right agent to handle your home transaction. We are more than pleased, and we recommend future homeowners to have a conversation with Nikmat.",
+    ],
+  },
 ];
 const CRITERIA = [
   "Communication",
