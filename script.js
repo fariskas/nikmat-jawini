@@ -403,3 +403,57 @@ window.addEventListener("resize", () => {
 
 document.getElementById("yr").textContent = new Date().getFullYear();
     
+
+/* ---------- TikTok Pixel: click + section-view events ---------- */
+function ttTrack(event, props) {
+  try {
+    if (window.ttq) window.ttq.track(event, props);
+  } catch (_) {}
+}
+// where on the page a click came from: nav, hero, why, offer, reviews, contact, footer…
+function ttWhere(el) {
+  const s = el.closest("section[id], section.hero, header, footer");
+  if (!s) return "page";
+  if (s.id) return s.id;
+  if (s.classList.contains("hero")) return "hero";
+  return s.tagName.toLowerCase() === "header" ? "nav" : "footer";
+}
+document.addEventListener("click", (e) => {
+  const a = e.target.closest("a[href]");
+  if (!a) return;
+  const href = a.getAttribute("href");
+  const where = ttWhere(a);
+  if (href.includes("wa.me")) {
+    ttTrack("Contact", { content_name: "whatsapp", description: where });
+  } else if (href.startsWith("tel:")) {
+    ttTrack("Contact", { content_name: "phone", description: where });
+  } else if (href.includes("instagram.com")) {
+    ttTrack("ClickButton", { content_name: "instagram", description: where });
+  } else if (href.includes("propertyportal.era.com.sg")) {
+    ttTrack("ClickButton", { content_name: "era_reviews", description: where });
+  } else if (href.startsWith("#")) {
+    ttTrack("ClickButton", {
+      content_name: "goto_" + (href.slice(1) || "top"),
+      description: where,
+    });
+  }
+});
+// fire once per section, when it reaches the middle of the screen
+const ttSeen = new IntersectionObserver(
+  (es) => {
+    es.forEach((e) => {
+      if (!e.isIntersecting) return;
+      ttTrack("ViewContent", {
+        content_id: e.target.id,
+        content_name: "section_" + e.target.id,
+        content_type: "product",
+      });
+      ttSeen.unobserve(e.target);
+    });
+  },
+  { rootMargin: "-50% 0px -50% 0px" },
+);
+["why", "offer", "awards", "reviews", "contact"].forEach((id) => {
+  const el = document.getElementById(id);
+  if (el) ttSeen.observe(el);
+});
