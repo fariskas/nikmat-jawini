@@ -284,34 +284,39 @@ document.addEventListener("click", (e) => {
   if (!a) return;
   const href = a.getAttribute("href");
   const where = ttWhere(a);
+  // Leads stay as TikTok's standard "Contact" event so ads can optimise for them.
+  // Everything else uses a plain-English custom event name, so the Events Manager
+  // list reads like "Tapped_Instagram" instead of a wall of "Click button".
   if (href.includes("wa.me")) {
-    ttTrack("Contact", { content_name: "whatsapp", description: where });
+    ttTrack("Contact", { content_name: "WhatsApp (" + where + ")" });
   } else if (href.startsWith("tel:")) {
     ttTrack("Contact", {
-      content_name: isDesktop() ? "copy_number" : "phone",
-      description: where,
+      content_name:
+        (isDesktop() ? "Copied number" : "Phone call") + " (" + where + ")",
     });
   } else if (href.includes("instagram.com")) {
-    ttTrack("ClickButton", { content_name: "instagram", description: where });
+    ttTrack("Tapped_Instagram", { content_name: where });
   } else if (href.includes("propertyportal.era.com.sg")) {
-    ttTrack("ClickButton", { content_name: "era_reviews", description: where });
+    ttTrack("Tapped_ERA_Reviews", { content_name: where });
   } else if (href.startsWith("#")) {
-    ttTrack("ClickButton", {
-      content_name: "goto_" + (href.slice(1) || "top"),
-      description: where,
-    });
+    const id = href.slice(1) || "top";
+    ttTrack("Menu_" + (TT_SECTION[id] || id), { content_name: where });
   }
 });
+const TT_SECTION = {
+  top: "Top",
+  why: "Why_Me",
+  offer: "Offer",
+  awards: "Awards",
+  reviews: "Reviews",
+  contact: "Contact",
+};
 // fire once per section, when it reaches the middle of the screen
 const ttSeen = new IntersectionObserver(
   (es) => {
     es.forEach((e) => {
       if (!e.isIntersecting) return;
-      ttTrack("ViewContent", {
-        content_id: e.target.id,
-        content_name: "section_" + e.target.id,
-        content_type: "product",
-      });
+      ttTrack("Scrolled_To_" + (TT_SECTION[e.target.id] || e.target.id));
       ttSeen.unobserve(e.target);
     });
   },
