@@ -215,14 +215,23 @@ p {
   transform-origin: right;
   transition: transform 0.34s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
-.nav-links a:hover,
 .nav-links a.is-active {
   color: #fff;
 }
-.nav-links a:hover::after,
+@media (hover: hover) and (pointer: fine) {
+  .nav-links a:hover {
+    color: #fff;
+  }
+}
 .nav-links a.is-active::after {
   transform: scaleX(1);
   transform-origin: left;
+}
+@media (hover: hover) and (pointer: fine) {
+  .nav-links a:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
 }
 .nav-social {
   display: flex;
@@ -245,9 +254,11 @@ p {
   width: 17px;
   height: 17px;
 }
-.icon-btn:hover {
-  background: var(--red);
-  border-color: var(--red);
+@media (hover: hover) and (pointer: fine) {
+  .icon-btn:hover {
+    background: var(--red);
+    border-color: var(--red);
+  }
 }
 .wa-btn {
   display: inline-flex;
@@ -269,9 +280,11 @@ p {
   width: 15px;
   height: 15px;
 }
-.wa-btn:hover {
-  background: var(--red);
-  color: #fff;
+@media (hover: hover) and (pointer: fine) {
+  .wa-btn:hover {
+    background: var(--red);
+    color: #fff;
+  }
 }
 .burger {
   display: none;
@@ -381,9 +394,11 @@ h1 .red {
   width: 18px;
   height: 18px;
 }
-.btn-red:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 18px 40px -16px rgba(228, 0, 43, 0.95);
+@media (hover: hover) and (pointer: fine) {
+  .btn-red:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 40px -16px rgba(228, 0, 43, 0.95);
+  }
 }
 .btn-line {
   display: inline-flex;
@@ -399,10 +414,12 @@ h1 .red {
   text-transform: uppercase;
   transition: 0.25s;
 }
-.btn-line:hover {
-  background: #fff;
-  color: var(--navy);
-  border-color: #fff;
+@media (hover: hover) and (pointer: fine) {
+  .btn-line:hover {
+    background: #fff;
+    color: var(--navy);
+    border-color: #fff;
+  }
 }
 .hero-figure {
   position: relative;
@@ -576,9 +593,11 @@ section {
   width: 64px;
   background: var(--red);
 }
-.card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 26px 50px -30px rgba(26, 42, 57, 0.45);
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 26px 50px -30px rgba(26, 42, 57, 0.45);
+  }
 }
 .card .idx {
   font-size: 0.66rem;
@@ -725,8 +744,10 @@ section {
   box-shadow: 0 22px 44px -22px rgba(0, 0, 0, 0.85);
   transition: transform 0.35s;
 }
-.award:hover {
-  transform: translateY(-8px);
+@media (hover: hover) and (pointer: fine) {
+  .award:hover {
+    transform: translateY(-8px);
+  }
 }
 .award img {
   height: 100%;
@@ -756,8 +777,10 @@ section {
   padding-bottom: 6px;
   transition: 0.25s;
 }
-.link-red:hover {
-  gap: 15px;
+@media (hover: hover) and (pointer: fine) {
+  .link-red:hover {
+    gap: 15px;
+  }
 }
 .carousel {
   margin-top: clamp(38px, 4.4vw, 56px);
@@ -897,8 +920,10 @@ section {
   line-height: 1.4;
   transition: opacity 0.2s;
 }
-.rev-more:hover {
-  opacity: 0.7;
+@media (hover: hover) and (pointer: fine) {
+  .rev-more:hover {
+    opacity: 0.7;
+  }
 }
 .rev-more[hidden] {
   display: none;
@@ -948,10 +973,12 @@ section {
   width: 16px;
   height: 16px;
 }
-.arrow:hover {
-  background: var(--red);
-  border-color: var(--red);
-  color: #fff;
+@media (hover: hover) and (pointer: fine) {
+  .arrow:hover {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+  }
 }
 .dots {
   display: flex;
@@ -1084,8 +1111,10 @@ section {
   text-decoration: none;
   transition: 0.22s;
 }
-.foot a:hover {
-  color: var(--red);
+@media (hover: hover) and (pointer: fine) {
+  .foot a:hover {
+    color: var(--red);
+  }
 }
 .foot-social {
   display: flex;
