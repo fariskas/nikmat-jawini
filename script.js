@@ -284,15 +284,13 @@ document.addEventListener("click", (e) => {
   if (!a) return;
   const href = a.getAttribute("href");
   const where = ttWhere(a);
-  if (href.endsWith(".vcf")) {
-    ttTrack("Contact", {
-      content_name: isDesktop() ? "copy_number" : "save_contact",
-      description: where,
-    });
-  } else if (href.includes("wa.me")) {
+  if (href.includes("wa.me")) {
     ttTrack("Contact", { content_name: "whatsapp", description: where });
   } else if (href.startsWith("tel:")) {
-    ttTrack("Contact", { content_name: "phone", description: where });
+    ttTrack("Contact", {
+      content_name: isDesktop() ? "copy_number" : "phone",
+      description: where,
+    });
   } else if (href.includes("instagram.com")) {
     ttTrack("ClickButton", { content_name: "instagram", description: where });
   } else if (href.includes("propertyportal.era.com.sg")) {
@@ -324,7 +322,7 @@ const ttSeen = new IntersectionObserver(
   if (el) ttSeen.observe(el);
 });
 
-/* ---------- "Save my number": contact card on phones, copy + tooltip on desktop ---------- */
+/* ---------- phone links: dial on phones, copy + tooltip on desktop ---------- */
 const PHONE = "+65 9658 3122";
 function isDesktop() {
   return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
@@ -365,10 +363,10 @@ function showTip(el, msg) {
 window.addEventListener("scroll", () => tip && tip.classList.remove("show"), {
   passive: true,
 });
-document.querySelectorAll('a[href$=".vcf"]').forEach((a) => {
+document.querySelectorAll('a[href^="tel:"]').forEach((a) => {
   if (isDesktop()) a.title = "Copy " + PHONE;
   a.addEventListener("click", (e) => {
-    if (!isDesktop()) return; // phones: open the contact card
+    if (!isDesktop()) return; // phones: open the dialer
     e.preventDefault();
     copyText(PHONE).then(
       () => showTip(a, "Number copied"),
