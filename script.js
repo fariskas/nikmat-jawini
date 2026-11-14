@@ -284,7 +284,12 @@ document.addEventListener("click", (e) => {
   if (!a) return;
   const href = a.getAttribute("href");
   const where = ttWhere(a);
-  if (href.includes("wa.me")) {
+  if (href.endsWith(".vcf")) {
+    ttTrack("Contact", {
+      content_name: isDesktop() ? "copy_number" : "save_contact",
+      description: where,
+    });
+  } else if (href.includes("wa.me")) {
     ttTrack("Contact", { content_name: "whatsapp", description: where });
   } else if (href.startsWith("tel:")) {
     ttTrack("Contact", { content_name: "phone", description: where });
@@ -317,4 +322,57 @@ const ttSeen = new IntersectionObserver(
 ["why", "offer", "awards", "reviews", "contact"].forEach((id) => {
   const el = document.getElementById(id);
   if (el) ttSeen.observe(el);
+});
+
+/* ---------- "Save my number": contact card on phones, copy + tooltip on desktop ---------- */
+const PHONE = "+65 9658 3122";
+function isDesktop() {
+  return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+}
+function copyText(t) {
+  if (navigator.clipboard && window.isSecureContext)
+    return navigator.clipboard.writeText(t);
+  return new Promise((ok, fail) => {
+    const ta = document.createElement("textarea");
+    ta.value = t;
+    ta.setAttribute("readonly", "");
+    ta.style.cssText = "position:fixed;opacity:0;pointer-events:none";
+    document.body.appendChild(ta);
+    ta.select();
+    const done = document.execCommand("copy");
+    ta.remove();
+    done ? ok() : fail();
+  });
+}
+let tip, tipT;
+function showTip(el, msg) {
+  if (!tip) {
+    tip = document.createElement("div");
+    tip.className = "copy-tip";
+    tip.setAttribute("role", "status");
+    document.body.appendChild(tip);
+  }
+  const r = el.getBoundingClientRect();
+  tip.textContent = msg;
+  tip.style.left = r.left + r.width / 2 + "px";
+  const below = r.top < 90; // header button: show under it
+  tip.classList.toggle("below", below);
+  tip.style.top = (below ? r.bottom + 10 : r.top - 10) + "px";
+  tip.classList.add("show");
+  clearTimeout(tipT);
+  tipT = setTimeout(() => tip.classList.remove("show"), 1800);
+}
+window.addEventListener("scroll", () => tip && tip.classList.remove("show"), {
+  passive: true,
+});
+document.querySelectorAll('a[href$=".vcf"]').forEach((a) => {
+  if (isDesktop()) a.title = "Copy " + PHONE;
+  a.addEventListener("click", (e) => {
+    if (!isDesktop()) return; // phones: open the contact card
+    e.preventDefault();
+    copyText(PHONE).then(
+      () => showTip(a, "Number copied"),
+      () => showTip(a, PHONE),
+    );
+  });
 });
