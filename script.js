@@ -213,7 +213,7 @@ const spy = new IntersectionObserver(
   },
   { rootMargin: "-45% 0px -50% 0px" },
 );
-["top", "why", "offer", "awards", "reviews", "contact"].forEach((id) => {
+["top", "valuation", "why", "offer", "awards", "reviews", "contact"].forEach((id) => {
   const el = document.getElementById(id);
   if (el) spy.observe(el);
 });
@@ -305,6 +305,7 @@ document.addEventListener("click", (e) => {
 });
 const TT_SECTION = {
   top: "Top",
+  valuation: "Free_Valuation",
   why: "Why_Me",
   offer: "Offer",
   awards: "Awards",
@@ -322,7 +323,7 @@ const ttSeen = new IntersectionObserver(
   },
   { rootMargin: "-50% 0px -50% 0px" },
 );
-["why", "offer", "awards", "reviews", "contact"].forEach((id) => {
+["valuation", "why", "offer", "awards", "reviews", "contact"].forEach((id) => {
   const el = document.getElementById(id);
   if (el) ttSeen.observe(el);
 });
@@ -379,3 +380,27 @@ document.querySelectorAll('a[href^="tel:"]').forEach((a) => {
     );
   });
 });
+
+/* ---------- WhatsApp pre-filled message ----------
+   index.html ships the TikTok wording (most visitors come from the ad).
+   Visitors with no TikTok signal get the same message without the ad mention. */
+(function () {
+  const KEY = "nj_from_tiktok";
+  let fromTikTok = false;
+  try {
+    const q = new URLSearchParams(location.search);
+    fromTikTok =
+      q.has("ttclid") ||
+      /tiktok/i.test(q.get("utm_source") || "") ||
+      /tiktok/i.test(document.referrer) ||
+      /tiktok|musical_ly|bytedance/i.test(navigator.userAgent) ||
+      sessionStorage.getItem(KEY) === "1";
+    if (fromTikTok) sessionStorage.setItem(KEY, "1");
+  } catch (_) {}
+  if (fromTikTok) return;
+  const msg =
+    "Hi Nikmat, I came across your website and would like to find out how much my property could potentially sell for.";
+  document.querySelectorAll('a[href*="wa.me/"]').forEach((a) => {
+    a.href = "https://wa.me/6596583122?text=" + encodeURIComponent(msg);
+  });
+})();

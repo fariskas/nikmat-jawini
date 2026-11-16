@@ -19,7 +19,7 @@
   --on-dark: rgba(255, 255, 255, 0.68);
   --nav-h: 76px;
   --pad: clamp(20px, 5vw, 64px);
-  --maxw: 1280px;
+  --maxw: calc(1280px + 2 * var(--pad)); /* 1280px of content + side gutters */
 }
 *,
 *::before,
@@ -1380,5 +1380,39 @@ section {
   .hs span {
     display: flex;
     line-height: 1.5;
+  }
+}
+
+/* ---------- free valuation CTAs ---------- */
+.cta-note {
+  margin: 16px 0 0;
+  font-size: 0.86rem;
+  letter-spacing: 0.01em;
+  color: var(--muted);
+}
+.hero .cta-note,
+.contact .cta-note {
+  color: rgba(255, 255, 255, 0.6);
+}
+.cards-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.cards-3 .card .idx {
+  color: var(--red);
+}
+.val-cta {
+  margin-top: clamp(38px, 4.6vw, 56px);
+  text-align: center;
+}
+@media (max-width: 900px) {
+  .cards-3 {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 560px) {
+  .hero-cta .btn-red,
+  .val-cta .btn-red {
+    width: 100%;
+    justify-content: center;
   }
 }
