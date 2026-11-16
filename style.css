@@ -1416,3 +1416,33 @@ section {
     justify-content: center;
   }
 }
+
+/* ---------- WhatsApp buttons: WhatsApp green ---------- */
+:root {
+  --wa: #1da851;
+  --wa-hover: #178c43;
+}
+a.btn-red[href*="wa.me"] {
+  background: var(--wa);
+  box-shadow: 0 10px 30px -14px rgba(29, 168, 81, 0.9);
+}
+.wa-btn,
+a.icon-btn[href*="wa.me"] {
+  background: var(--wa);
+  border-color: var(--wa);
+  color: #fff;
+}
+a.phone[href*="wa.me"] {
+  border-bottom-color: var(--wa);
+}
+@media (hover: hover) and (pointer: fine) {
+  a.btn-red[href*="wa.me"]:hover {
+    box-shadow: 0 18px 40px -16px rgba(29, 168, 81, 0.95);
+  }
+  .wa-btn:hover,
+  a.icon-btn[href*="wa.me"]:hover {
+    background: var(--wa-hover);
+    border-color: var(--wa-hover);
+    color: #fff;
+  }
+}
